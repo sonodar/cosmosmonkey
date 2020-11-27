@@ -1,112 +1,76 @@
-package service
+import { RDS } from 'aws-sdk'
+import { ResourceHandler, ResourceManager, ResourceType } from '../../../model'
+import { RDSInstanceResource } from './RDSInstanceResource'
+import { getRDSTagValue } from '../RDSTagValueParser'
+import { TagValueParser } from '../../TagValueParser'
 
-import (
-	"github.com/aws/aws-sdk-go/service/rds"
-
-	"github.com/sonodar/cosmosmonkey/domain/resource"
-	"github.com/sonodar/cosmosmonkey/infra/util"
-)
+export type RDSInstanceClient = Pick<
+  RDS,
+  'startDBInstance' | 'stopDBInstance' | 'describeDBInstances' | 'listTagsForResource'
+>
 
 /**
  * RDS インスタンスの取得、起動、停止を行う。
  */
-type DBInstanceManager struct {
-	service *rds.RDS
-	tagKey  string
+export class RDSInstanceResourceManager implements ResourceManager<RDSInstanceResource> {
+  public readonly supportedType = ResourceType.RDS_INSTANCE
+
+  constructor(private readonly rds: RDSInstanceClient, private readonly tagName: string) {}
+
+  async eachResources(handler: ResourceHandler<RDSInstanceResource>): Promise<void> {
+    for await (const instances of getTargetInstances(this.rds, this.tagName)) {
+      for (const instance of instances) {
+        const resource = await toResource(this.rds, instance, this.tagName)
+        if (resource) await handler(resource)
+      }
+    }
+  }
+
+  async start(resource: RDSInstanceResource): Promise<void> {
+    const request: RDS.StartDBInstanceMessage = { DBInstanceIdentifier: resource.id }
+    await this.rds.startDBInstance(request).promise()
+  }
+
+  async stop(resource: RDSInstanceResource): Promise<void> {
+    const request: RDS.StopDBInstanceMessage = { DBInstanceIdentifier: resource.id }
+    await this.rds.stopDBInstance(request).promise()
+  }
 }
 
 /**
- * DBInstanceManager を生成する。
+ * RDS はタグでの検索に対応していないため、全件取得して N+1 でタグを取得する。
+ * TODO: 現在は ResourceManager の search API でタグ検索ができるので後ほどリファクタリング。
  */
-func NewDBInstanceManager(service *rds.RDS, tagKey string) *DBInstanceManager {
-	return &DBInstanceManager{service: service, tagKey: tagKey}
-}
+async function* getTargetInstances(
+  rds: RDSInstanceClient,
+  tagName: string,
+  marker?: string
+): AsyncGenerator<RDS.DBInstance[]> {
+  const request: RDS.DescribeDBInstancesMessage = {}
+  if (marker) request.Marker = marker
 
-func (this *DBInstanceManager) SupportedType() string {
-	return DBInstanceType
+  const { DBInstances, Marker } = await rds.describeDBInstances(request).promise()
+
+  yield DBInstances || []
+
+  if (!Marker) return
+
+  for await (const instances of getTargetInstances(rds, tagName, Marker)) {
+    yield instances
+  }
 }
 
 /**
- * DB インスタンスを起動する。
+ * 指定したタグを持っていた場合のみ、DBInstance をドメインオブジェクトに変換する。
  */
-func (this *DBInstanceManager) Start(target resource.Resource) error {
-	util.Debugf("called Start({%s})\n", resource.ToString(target))
-	input := &rds.StartDBInstanceInput{DBInstanceIdentifier: target.Id()}
-	if _, err := this.service.StartDBInstance(input); err != nil {
-		util.Errorf("rds:StartDBInstance %v\n", err)
-		return err
-	}
-	return nil
-}
-
-/**
- * DB インスタンスを停止する。
- */
-func (this *DBInstanceManager) Stop(target resource.Resource) error {
-	util.Debugf("called Stop({%s})\n", resource.ToString(target))
-	input := &rds.StopDBInstanceInput{DBInstanceIdentifier: target.Id()}
-	if _, err := this.service.StopDBInstance(input); err != nil {
-		util.Errorf("rds:StopDBInstance %v\n", err)
-		return err
-	}
-	return nil
-}
-
-func (this *DBInstanceManager) EachResources(handler resource.ResourceHandler) error {
-	util.Debugln("called EachResources()")
-	return this.eachResources(handler, nil)
-}
-
-// Private Methods
-
-func (this *DBInstanceManager) eachResources(handler resource.ResourceHandler, marker *string) error {
-	input := &rds.DescribeDBInstancesInput{}
-	if marker != nil {
-		input.SetMarker(*marker)
-	}
-
-	output, err := this.service.DescribeDBInstances(input)
-	if err != nil {
-		util.Errorf("rds:DescribeDBClusters %v\n", err)
-		return err
-	}
-
-	for _, instance := range output.DBInstances {
-		resource, err := this.newInstanceResource(instance)
-		if err != nil || resource == nil {
-			return err
-		}
-		if err := handler(resource); err != nil {
-			return err
-		}
-	}
-
-	if output.Marker == nil {
-		return nil
-	}
-
-	return this.eachResources(handler, output.Marker)
-}
-
-/**
- * dbInstanceResource を生成する。
- */
-func (this *DBInstanceManager) newInstanceResource(instance *rds.DBInstance) (resource.Resource, error) {
-	tagValue, err := getDBTagValue(this.service, instance.DBInstanceArn, this.tagKey)
-	if err != nil || tagValue == nil {
-		return nil, err
-	}
-
-	startStopTime, warn := util.ParseStartStopTime(*tagValue)
-
-	if warn != nil {
-		util.Warnf("Skip %s [%s], because %v\n",
-			DBInstanceType, *instance.DBClusterIdentifier, warn)
-		return nil, nil
-	}
-
-	return &dbInstanceResource{
-		instance:      instance,
-		startStopTime: *startStopTime,
-	}, nil
+async function toResource(
+  rds: RDSInstanceClient,
+  cluster: RDS.DBInstance,
+  tagName: string
+): Promise<RDSInstanceResource | null> {
+  /* istanbul ignore next */ if (!cluster.DBInstanceArn) return null // dead code
+  const tag = await getRDSTagValue(rds, cluster.DBInstanceArn, tagName)
+  const tagValue = TagValueParser.parse(tag)
+  if (!tagValue) return null
+  return new RDSInstanceResource(cluster, tagValue.startStopTime)
 }

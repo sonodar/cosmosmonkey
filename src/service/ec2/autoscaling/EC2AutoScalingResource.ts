@@ -1,39 +1,61 @@
-package service
+import { Resource, ResourceType, StartStopTime } from '../../../model'
+import { AutoScaling } from 'aws-sdk'
+import { AutoScalingPolicy } from './EC2AutoScalingPolicy'
 
-import (
-	"github.com/aws/aws-sdk-go/service/autoscaling"
+export type AutoScalingGroup = Pick<
+  AutoScaling.AutoScalingGroup,
+  'AutoScalingGroupName' | 'MinSize' | 'MaxSize' | 'DesiredCapacity'
+> &
+  Partial<Pick<AutoScaling.AutoScalingGroup, 'Tags'>>
 
-	"github.com/sonodar/cosmosmonkey/domain/time"
-)
+export class EC2AutoScalingResource implements Resource, AutoScalingPolicy {
+  public readonly type = ResourceType.AUTO_SCALING_GROUP
+  public readonly name: string
 
-const AutoScalingType = "AWS::AutoScaling::Group"
+  public readonly currentAutoScalingPolicy: AutoScalingPolicy
 
-type autoScalingGroupResource struct {
-	group          *autoscaling.Group
-	originalPolicy *originAutoScalingPolicy
-	startStopTime  *time.StartStopTime
-}
+  get minSize(): number {
+    return this.currentAutoScalingPolicy.minSize
+  }
 
-func (this *autoScalingGroupResource) Type() string {
-	return AutoScalingType
-}
+  get maxSize(): number {
+    return this.currentAutoScalingPolicy.maxSize
+  }
 
-func (this *autoScalingGroupResource) Id() *string {
-	return this.Name()
-}
+  get desiredCapacity(): number {
+    return this.currentAutoScalingPolicy.desiredCapacity
+  }
 
-func (this *autoScalingGroupResource) Name() *string {
-	return this.group.AutoScalingGroupName
-}
+  constructor(
+    group: AutoScalingGroup,
+    public readonly originalAutoScalingPolicy: AutoScalingPolicy,
+    public readonly startStopTime: StartStopTime
+  ) {
+    this.name = group.AutoScalingGroupName
+    this.currentAutoScalingPolicy = {
+      minSize: group.MinSize,
+      maxSize: group.MaxSize,
+      desiredCapacity: group.DesiredCapacity,
+    }
+  }
 
-func (this *autoScalingGroupResource) StartStopTime() *time.StartStopTime {
-	return this.startStopTime
-}
+  get id(): string {
+    return this.name
+  }
 
-func (this *autoScalingGroupResource) CanStart() bool {
-	return *this.group.DesiredCapacity == 0 && *this.group.MaxSize == 0 && *this.group.MinSize == 0
-}
+  get canStart(): boolean {
+    return (
+      this.currentAutoScalingPolicy.desiredCapacity === 0 &&
+      this.currentAutoScalingPolicy.minSize === 0 &&
+      this.currentAutoScalingPolicy.maxSize === 0
+    )
+  }
 
-func (this *autoScalingGroupResource) CanStop() bool {
-	return *this.group.DesiredCapacity > 0 || *this.group.MaxSize > 0 || *this.group.MinSize > 0
+  get canStop(): boolean {
+    return (
+      this.currentAutoScalingPolicy.desiredCapacity > 0 ||
+      this.currentAutoScalingPolicy.minSize > 0 ||
+      this.currentAutoScalingPolicy.maxSize > 0
+    )
+  }
 }

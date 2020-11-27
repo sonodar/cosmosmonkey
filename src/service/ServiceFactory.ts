@@ -1,34 +1,33 @@
-package infra
+import { EC2, AutoScaling, RDS } from 'aws-sdk'
+import { ChainResourceManager, AutoStartStopService } from '../model'
+import { EC2Client, EC2InstanceResourceManager } from './ec2/instance'
+import { AutoScalingClient, EC2AutoScalingResourceManager } from './ec2/autoscaling'
+import { RDSClusterClient, RDSClusterResourceManager } from './rds/cluster'
+import { RDSInstanceClient, RDSInstanceResourceManager } from './rds/instance'
 
-import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/rds"
-	"github.com/sonodar/cosmosmonkey/domain"
+export class ServiceFactory {
+  public options: { region: string }
+  public ec2: EC2Client
+  public autoscaling: AutoScalingClient
+  public rds: RDSInstanceClient
+  public aurora: RDSClusterClient
 
-	"github.com/sonodar/cosmosmonkey/infra/service"
-)
+  constructor(private readonly region: string, private readonly tagName: string) {
+    this.options = { region: this.region }
+    this.ec2 = new EC2(this.options)
+    this.autoscaling = new AutoScaling(this.options)
+    this.rds = new RDS(this.options)
+    this.aurora = new RDS(this.options)
+  }
 
-type ServiceFactory struct {
-	session *session.Session
-	tagKey  string
-}
+  createStartStopService(dryRun = false): AutoStartStopService {
+    const ec2Instance = new EC2InstanceResourceManager(this.ec2, this.tagName)
+    const autoScaling = new EC2AutoScalingResourceManager(this.autoscaling, this.tagName)
+    const rdsInstance = new RDSInstanceResourceManager(this.rds, this.tagName)
+    const auroraCluster = new RDSClusterResourceManager(this.aurora, this.tagName)
 
-func NewServiceFactory(region string, tagKey string) *ServiceFactory {
-	awsSession := session.Must(session.NewSession(aws.NewConfig().WithRegion(region)))
-	return &ServiceFactory{session: awsSession, tagKey: tagKey}
-}
+    const manager = new ChainResourceManager(ec2Instance, autoScaling, rdsInstance, auroraCluster)
 
-func (this *ServiceFactory) CreateStartStopService(dryRun bool) *domain.AutoStartStopService {
-	rdsClient := rds.New(this.session)
-
-	manager := &AllResourceManager{dryRun: dryRun}
-
-	// 各サービスごとの実装を追加する
-	manager.AddManager(service.NewEC2InstanceManager(this.session, this.tagKey))
-	manager.AddManager(service.NewDBInstanceManager(rdsClient, this.tagKey))
-	manager.AddManager(service.NewAutoScalingManager(this.session, this.tagKey))
-	manager.AddManager(service.NewDBClusterManager(rdsClient, this.tagKey))
-
-	return domain.New(manager)
+    return new AutoStartStopService(manager, dryRun)
+  }
 }
