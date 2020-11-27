@@ -15,18 +15,10 @@ Parameters:
     Description: Async execution flag
     Type: String
     Default: "false"
-  MaxConcurrentSize:
-    Description: Maximum number of launch / shutdown requests to be executed concurrently
-    Type: Number
-    Default: 50
-  LogTimezone:
-    Description: Timezone of log outputs
-    Type: String
-    Default: UTC
   LogLevel:
-    Description: Logging level (valid values are [debug/info/warn(ing)/error(fatel)/disabled], case insensitive)
+    Description: Logging level (valid values are [debug/info/warn/error/disabled], case insensitive)
     Type: String
-    Default: Info
+    Default: info
   PollingSchedule:
     Description: Polling schedule literal of CloudWatch Event Rule
     Type: String
@@ -48,16 +40,14 @@ Resources:
     Properties:
       FunctionName: !Ref FunctionName
       CodeUri: dist/
-      Handler: cosmosmonkey
-      Runtime: go1.x
+      Handler: main.handler
+      Runtime: node12.x
       Timeout: 900
       MemorySize: 256
       Role: !GetAtt AutoStartStopRole.Arn
       Environment:
         Variables:
           AUTO_START_STOP_TAG_KEY: !Ref AutoStartStopTagKey
-          MAX_CONCURRENT_SIZE: !Ref MaxConcurrentSize
-          LOGGING_TZ: !Ref LogTimezone
           ASYNC: !Ref Async
           LOG_LEVEL: !Ref LogLevel
       Events:
