@@ -17,5 +17,12 @@ module.exports = {
       files: ['**/*.js'],
       rules: { '@typescript-eslint/no-var-requires': 'off' },
     },
+    {
+      files: ['**/test/**/*Test.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
+      },
+    },
   ],
 }

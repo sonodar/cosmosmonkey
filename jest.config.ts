@@ -1,8 +1,10 @@
 export default {
+  moduleNameMapper: {
+    models: '<rootDir>/src/model',
+  },
   coverageDirectory: 'coverage',
-  coverageProvider: 'v8',
   testEnvironment: 'node',
-  testMatch: ['**/test/**/*.[jt]s'],
+  testMatch: ['**/test/**/*Test.[jt]s'],
   moduleFileExtensions: ['js', 'ts'],
   transform: { '^.+\\.ts$': 'ts-jest' },
   collectCoverage: true,

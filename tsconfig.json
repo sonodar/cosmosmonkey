@@ -7,7 +7,7 @@
     "sourceMap": true,
     "strict": true,
     "baseUrl": ".",
-    "rootDir": "./src",
+    "rootDirs": ["./src", "./test"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,

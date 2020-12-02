@@ -1,4 +1,4 @@
-import { Time } from '../../../src/model'
+import { Time } from 'models'
 
 describe(Time, () => {
   describe('toString', () => {
