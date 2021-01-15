@@ -11,14 +11,6 @@ Parameters:
     Description: Tag-key of resource to reference
     Type: String
     Default: AutoStartStop
-  Async:
-    Description: Async execution flag
-    Type: String
-    Default: "false"
-  LogLevel:
-    Description: Logging level (valid values are [debug/info/warn/error/disabled], case insensitive)
-    Type: String
-    Default: info
   PollingSchedule:
     Description: Polling schedule literal of CloudWatch Event Rule
     Type: String
@@ -54,47 +46,32 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: !Ref PollingSchedule
-
-  # Lambda 実行ロール
-  AutoStartStopRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${FunctionName}Role"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${FunctionName}Policy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              # Lambda 関数の基本的な認可
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - xray:PutTraceSegments
-                  - xray:PutTelemetryRecords
-                Resource: "*"
-              # Lambda 関数コードで必要とする認可
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeInstances
-                  - ec2:StartInstances
-                  - ec2:StopInstances
-                  - rds:DescribeDBClusters
-                  - rds:DescribeDBInstances
-                  - rds:ListTagsForResource
-                  - rds:StartDB*
-                  - rds:StopDB*
-                  - autoscaling:DescribeAutoScalingGroups
-                  - autoscaling:UpdateAutoScalingGroup
-                Resource: "*"
+        - Statement:
+          # EC2 Instances
+          - Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:StartInstances
+              - ec2:StopInstances
+            Resource: '*'
+          # RDS Clusters, Instances
+          - Effect: Allow
+            Action:
+              - rds:DescribeDBClusters
+              - rds:DescribeDBInstances
+              - rds:ListTagsForResource
+              - rds:StartDBCluster
+              - rds:StopDBCluster
+              - rds:StartDBInstance
+              - rds:StopDBInstance
+            Resource: '*'
+          # AutoScalingGroup
+          - Effect: Allow
+            Action:
+              - autoscaling:DescribeAutoScalingGroups
+              - autoscaling:UpdateAutoScalingGroup
+            Resource: '*'
 
 Outputs:
   AutoStartStopFunctionArn:

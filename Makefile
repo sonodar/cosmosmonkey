@@ -9,11 +9,11 @@ fmt:
 clean:
 	rm -rf ./dist
 
-build: install clean fmt
+build: clean
 	yarn build
 
-invoke:
+invoke: build
 	DRY_RUN=true sam local invoke --no-event
 
-deploy:
+deploy: build
 	sam deploy
