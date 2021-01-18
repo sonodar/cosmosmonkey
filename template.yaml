@@ -36,7 +36,6 @@ Resources:
       Runtime: nodejs12.x
       Timeout: 900
       MemorySize: 256
-      Role: !GetAtt AutoStartStopRole.Arn
       Environment:
         Variables:
           AUTO_START_STOP_TAG_KEY: !Ref AutoStartStopTagKey
