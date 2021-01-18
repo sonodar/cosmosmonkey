@@ -84,15 +84,15 @@ describe(EC2AutoScalingResourceManager, () => {
         NextToken: nextToken,
       })
 
-      const tagValue = '+0900,09:00-21:00,min=1,max=4,capacity=2'
+      const tagValue = '+0900 09:00-21:00 min=1 max=4 capacity=2'
 
       const response1 = makeResponse(
         [
           makeAutoScalingGroup({ name: '通常グループ', tagValue }),
-          makeAutoScalingGroup({ name: 'タグ値が不正なグループ', tagValue: '+0900,0900-2100' }),
+          makeAutoScalingGroup({ name: 'タグ値が不正なグループ', tagValue: '+0900 0900-2100' }),
           makeAutoScalingGroup({
             name: '関係ない数値がタグに混在しているグループ',
-            tagValue: tagValue + ',foo=1,bar=bar',
+            tagValue: tagValue + ' foo=1 bar=bar',
           }),
           makeAutoScalingGroup({ name: '数を増やすためのダミーたち', tagValue }),
         ],

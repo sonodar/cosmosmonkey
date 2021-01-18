@@ -59,12 +59,12 @@ describe(RDSClusterResourceManager, () => {
       ]
 
       const tagsResponse = [
-        makeListTagsForResourceResponse(makeTagList('+0900,09:00-21:00')),
-        makeListTagsForResourceResponse(makeTagList('+0900,0900-2100')),
-        makeListTagsForResourceResponse(makeTagList('+0900,09:00-21:00')),
+        makeListTagsForResourceResponse(makeTagList('+0900 09:00-21:00')),
+        makeListTagsForResourceResponse(makeTagList('+0900 0900-2100')),
+        makeListTagsForResourceResponse(makeTagList('+0900 09:00-21:00')),
         makeListTagsForResourceResponse([]),
-        makeListTagsForResourceResponse(makeTagList('+0900,09:00-21:00')),
-        makeListTagsForResourceResponse(makeTagList('+0900,09:00-21:00')),
+        makeListTagsForResourceResponse(makeTagList('+0900 09:00-21:00')),
+        makeListTagsForResourceResponse(makeTagList('+0900 09:00-21:00')),
       ]
 
       const makeClustersResponse = (
