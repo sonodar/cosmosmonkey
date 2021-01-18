@@ -28,7 +28,7 @@ export class TagValueParser {
 }
 
 function parseValue(value: string) {
-  const matcher = /^([-+]\d{3,4}),(\d{2}:\d{2})-(\d{2}:\d{2})/.exec(value)
+  const matcher = /^([-+]\d{3,4})[, ](\d{2}:\d{2})-(\d{2}:\d{2})/.exec(value)
   if (!matcher) return null
   const [, offset, startAt, stopAt] = Array.from(matcher)
   const config = getConfig(value)
