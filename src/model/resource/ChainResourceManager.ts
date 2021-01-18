@@ -1,65 +1,54 @@
-package infra
-
-import (
-	"golang.org/x/sync/errgroup"
-
-	"github.com/sonodar/cosmosmonkey/domain/resource"
-	"github.com/sonodar/cosmosmonkey/infra/service"
-	"github.com/sonodar/cosmosmonkey/infra/util"
-)
+import { Resource, ResourceHandler, ResourceManager, ResourceType } from '.'
+import { resourceToString } from './ResourceManager'
 
 /**
- * domain.ResourceManager のファーストクラスコレクション。
- * 自身も domain.ResourceManager を実装する。
+ * ResourceManager のファーストクラスコレクション。
+ * 自身も ResourceManager を実装する。
  */
-type AllResourceManager struct {
-	managers map[string]service.ServiceManager
-	dryRun   bool
+export class ChainResourceManager implements ResourceManager<Resource> {
+  public readonly supportedType = ResourceType.ALL_SUPPORTED
+  private readonly _managers = new Map<ResourceType, ResourceManager<Resource>>()
+
+  constructor(...managers: ResourceManager<Resource>[]) {
+    for (const manager of managers) this.addManager(manager)
+  }
+
+  public addManager(manager: ResourceManager<Resource>): void {
+    this._managers.set(manager.supportedType, manager)
+  }
+
+  get managers(): ResourceManager<Resource>[] {
+    return Array.from(this._managers.values())
+  }
+
+  async eachResources(handler: ResourceHandler<Resource>): Promise<void> {
+    const mapper = createEachResourcesForManagerHandler(handler)
+    await Promise.all(this.managers.map(mapper))
+  }
+
+  async start(resource: Resource): Promise<void> {
+    const manager = this._managers.get(resource.type)
+    if (!manager) {
+      return console.warn(resource.type + ' is not supported type')
+    }
+    await manager.start(resource)
+  }
+
+  async stop(resource: Resource): Promise<void> {
+    const manager = this._managers.get(resource.type)
+    if (!manager) {
+      return console.warn(resource.type + ' is not supported type')
+    }
+    await manager.stop(resource)
+  }
 }
 
-func (this *AllResourceManager) AddManager(manager service.ServiceManager) {
-	if this.managers == nil {
-		this.managers = map[string]service.ServiceManager{}
-	}
-	this.managers[manager.SupportedType()] = manager
-}
-
-func (this *AllResourceManager) EachResources(handler resource.ResourceHandler) error {
-	eg := errgroup.Group{}
-	for _, manager := range this.managers {
-		manager := manager
-		eg.Go(func() error {
-			return manager.EachResources(func(target resource.Resource) error {
-				util.Debugf("Target found, Resource = { %s }", resource.ToString(target))
-				return handler(target)
-			})
-		})
-	}
-	return eg.Wait()
-}
-
-func (this *AllResourceManager) Start(target resource.Resource) error {
-	if manager := this.managers[target.Type()]; manager == nil {
-		util.Warnf("%s is not supported type", target.Type())
-		return nil
-	} else {
-		if this.dryRun {
-			util.Infof("Called start operation for ", resource.ToString(target))
-			return nil
-		}
-		return manager.Start(target)
-	}
-}
-
-func (this *AllResourceManager) Stop(target resource.Resource) error {
-	if manager := this.managers[target.Type()]; manager == nil {
-		util.Warnf("%s is not supported type", target.Type())
-		return nil
-	} else {
-		if this.dryRun {
-			util.Infof("Called stop operation for ", resource.ToString(target))
-			return nil
-		}
-		return manager.Stop(target)
-	}
+function createEachResourcesForManagerHandler(handler: ResourceHandler<Resource>) {
+  return async (manager: ResourceManager<Resource>) => {
+    console.info(`Search target ${manager.supportedType} resources`)
+    await manager.eachResources((resource: Resource) => {
+      console.debug(`Target found, Resource = { ${resourceToString(resource)} }`)
+      return handler(resource)
+    })
+  }
 }

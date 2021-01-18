@@ -1,27 +1,12 @@
-package service
+import { RDS } from 'aws-sdk'
 
-import (
-	"github.com/aws/aws-sdk-go/service/rds"
-
-	"github.com/sonodar/cosmosmonkey/infra/util"
-)
+type RDSClient = Pick<RDS, 'listTagsForResource'>
 
 /**
  * RDS の Describe 系レスポンスはタグを持っていないので、タグ取得のAPIを別途実行してタグ値を取得する。
  */
-func getDBTagValue(client *rds.RDS, arn *string, tagKey string) (*string, error) {
-	input := &rds.ListTagsForResourceInput{ResourceName: arn}
-	output, err := client.ListTagsForResource(input)
-
-	if err != nil {
-		util.Errorf("rds:ListTagsForResource %v\n", err)
-		return nil, err
-	}
-
-	for _, tag := range output.TagList {
-		if *tag.Key == tagKey {
-			return tag.Value, nil
-		}
-	}
-	return nil, nil
+export async function getRDSTagValue(rds: RDSClient, arn: string, tagKey: string): Promise<string | null> {
+  const request: RDS.ListTagsForResourceMessage = { ResourceName: arn }
+  const response = await rds.listTagsForResource(request).promise()
+  return response?.TagList?.find(t => t.Key === tagKey)?.Value || null
 }

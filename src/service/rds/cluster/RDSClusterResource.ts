@@ -1,44 +1,25 @@
-package service
+import { RDS } from 'aws-sdk'
+import { Resource, ResourceType, StartStopTime } from '../../../model'
 
-import (
-	"github.com/aws/aws-sdk-go/service/rds"
-	"github.com/sonodar/cosmosmonkey/domain/time"
-)
+export class RDSClusterResource implements Resource {
+  public readonly type = ResourceType.RDS_CLUSTER
+  public readonly id: string
+  private readonly status: string
 
-const DBClusterType = "AWS::RDS::DBCluster"
+  constructor(cluster: RDS.DBCluster, public readonly startStopTime: StartStopTime) {
+    this.id = cluster.DBClusterIdentifier || ''
+    this.status = cluster.Status || ''
+  }
 
-type dbClusterResource struct {
-	cluster       *rds.DBCluster
-	startStopTime *time.StartStopTime
-}
+  get name(): string {
+    return this.id
+  }
 
-func makeClusterResource(cluster *rds.DBCluster, startStopTime *time.StartStopTime) *dbClusterResource {
-	return &dbClusterResource{
-		cluster:       cluster,
-		startStopTime: startStopTime,
-	}
-}
+  get canStart(): boolean {
+    return this.status === 'stopped'
+  }
 
-func (this *dbClusterResource) Type() string {
-	return DBClusterType
-}
-
-func (this *dbClusterResource) Id() *string {
-	return this.cluster.DBClusterIdentifier
-}
-
-func (this *dbClusterResource) Name() *string {
-	return this.Id()
-}
-
-func (this *dbClusterResource) StartStopTime() *time.StartStopTime {
-	return this.startStopTime
-}
-
-func (this *dbClusterResource) CanStart() bool {
-	return *this.cluster.Status == "stopped"
-}
-
-func (this *dbClusterResource) CanStop() bool {
-	return *this.cluster.Status == "available"
+  get canStop(): boolean {
+    return this.status === 'available'
+  }
 }
