@@ -1,7 +1,6 @@
 language: node_js
 node_js:
-  - node
-dist: trusty
+  - 12
 cache: yarn
 script:
   - yarn test --coverage

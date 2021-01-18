@@ -18,8 +18,7 @@ describe(TimesOfDay, () => {
 
   describe('toDateTime', () => {
     it('指定した日付における時刻のDateインスタンスが返ること', () => {
-      const date = new Date(2000, 10, 25)
-      date.setHours(12, 15, 0, 0)
+      const date = new Date('2000-10-25T12:15:00+0900')
       const timesOfDay = new TimesOfDay(new Time(12, 15), 900)
       expect(timesOfDay.toDateTime(date)).toEqual(date)
     })

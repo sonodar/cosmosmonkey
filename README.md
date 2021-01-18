@@ -1,6 +1,7 @@
 # CosmosMonkey
 
 ![build](https://travis-ci.org/sonodar/cosmosmonkey.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/sonodar/cosmosmonkey/badge.svg?branch=master)](https://coveralls.io/github/sonodar/cosmosmonkey?branch=master)
 
 This is not Chaos-Monkey.
 

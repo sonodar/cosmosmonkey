@@ -71,16 +71,16 @@ describe(EC2InstanceResourceManager, () => {
 
       const result1 = makeResponse(
         [
-          makeInstance('1', '通常インスタンス', '+0900,09:00-12:00'),
-          makeInstance('2', 'タグ値が不正なインスタンス', '+0900,0900-1200'),
-          makeInstance('3', '数を増やすためのダミー1', '+0900,09:00-12:00'),
+          makeInstance('1', '通常インスタンス', '+0900 09:00-12:00'),
+          makeInstance('2', 'タグ値が不正なインスタンス', '+0900 0900-1200'),
+          makeInstance('3', '数を増やすためのダミー1', '+0900 09:00-12:00'),
         ],
         'next-token'
       )
 
       const result2 = makeResponse([
-        makeInstance('4', '数を増やすためのダミー2', '+0900,09:00-12:00'),
-        makeInstance('5', '数を増やすためのダミー3', '+0900,09:00-12:00'),
+        makeInstance('4', '数を増やすためのダミー2', '+0900 09:00-12:00'),
+        makeInstance('5', '数を増やすためのダミー3', '+0900 09:00-12:00'),
       ])
 
       const describeInstances = createMockAwsApi(result1, result2)
