@@ -1,5 +1,7 @@
 # CosmosMonkey
 
+![build](https://travis-ci.org/sonodar/cosmosmonkey.svg?branch=master)
+
 This is not Chaos-Monkey.
 
 EC2インスタンスやRDSインスタンスを指定した時刻で自動起動・自動停止するスクリプトです。
