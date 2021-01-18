@@ -111,3 +111,20 @@ To delete the sample application that you created, use the AWS CLI. Assuming you
 ```bash
 aws cloudformation delete-stack --stack-name sam-app
 ```
+
+## Contribution
+
+大規模なリアーキテクチャを予定しているため、Pull Request してもらっても無駄になる可能性があります。  
+具体的には以下の対応を予定しています。
+
+- ResourceManager が SIP に違反しているので責務分割
+- インターフェースの全面見直し
+- ドメイン層など、レイヤーの厳密な定義
+
+We are planning to re-architecture. Adding features may be wasted.
+
+Specifically, we will make the following improvements.
+
+- Improved ResourceManager SIP violations
+- Interface redesign
+- Strict layer definition
