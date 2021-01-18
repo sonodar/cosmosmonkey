@@ -11,22 +11,6 @@ Parameters:
     Description: Tag-key of resource to reference
     Type: String
     Default: AutoStartStop
-  Async:
-    Description: Async execution flag
-    Type: String
-    Default: "false"
-  MaxConcurrentSize:
-    Description: Maximum number of launch / shutdown requests to be executed concurrently
-    Type: Number
-    Default: 50
-  LogTimezone:
-    Description: Timezone of log outputs
-    Type: String
-    Default: UTC
-  LogLevel:
-    Description: Logging level (valid values are [debug/info/warn(ing)/error(fatel)/disabled], case insensitive)
-    Type: String
-    Default: Info
   PollingSchedule:
     Description: Polling schedule literal of CloudWatch Event Rule
     Type: String
@@ -48,64 +32,45 @@ Resources:
     Properties:
       FunctionName: !Ref FunctionName
       CodeUri: dist/
-      Handler: cosmosmonkey
-      Runtime: go1.x
+      Handler: main.handler
+      Runtime: nodejs12.x
       Timeout: 900
       MemorySize: 256
-      Role: !GetAtt AutoStartStopRole.Arn
       Environment:
         Variables:
           AUTO_START_STOP_TAG_KEY: !Ref AutoStartStopTagKey
-          MAX_CONCURRENT_SIZE: !Ref MaxConcurrentSize
-          LOGGING_TZ: !Ref LogTimezone
-          ASYNC: !Ref Async
-          LOG_LEVEL: !Ref LogLevel
+          DRY_RUN: 'false'
       Events:
         Poller:
           Type: Schedule
           Properties:
             Schedule: !Ref PollingSchedule
-
-  # Lambda 実行ロール
-  AutoStartStopRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${FunctionName}Role"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${FunctionName}Policy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              # Lambda 関数の基本的な認可
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - xray:PutTraceSegments
-                  - xray:PutTelemetryRecords
-                Resource: "*"
-              # Lambda 関数コードで必要とする認可
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeInstances
-                  - ec2:StartInstances
-                  - ec2:StopInstances
-                  - rds:DescribeDBClusters
-                  - rds:DescribeDBInstances
-                  - rds:ListTagsForResource
-                  - rds:StartDB*
-                  - rds:StopDB*
-                  - autoscaling:DescribeAutoScalingGroups
-                  - autoscaling:UpdateAutoScalingGroup
-                Resource: "*"
+        - Statement:
+          # EC2 Instances
+          - Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:StartInstances
+              - ec2:StopInstances
+            Resource: '*'
+          # RDS Clusters, Instances
+          - Effect: Allow
+            Action:
+              - rds:DescribeDBClusters
+              - rds:DescribeDBInstances
+              - rds:ListTagsForResource
+              - rds:StartDBCluster
+              - rds:StopDBCluster
+              - rds:StartDBInstance
+              - rds:StopDBInstance
+            Resource: '*'
+          # AutoScalingGroup
+          - Effect: Allow
+            Action:
+              - autoscaling:DescribeAutoScalingGroups
+              - autoscaling:UpdateAutoScalingGroup
+            Resource: '*'
 
 Outputs:
   AutoStartStopFunctionArn:

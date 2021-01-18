@@ -1,5 +1,4 @@
-vendor/
-aws-ass
-cloudformation.yml
-*.zip
-dist/
+/dist
+/coverage
+/node_modules
+samconfig.toml
