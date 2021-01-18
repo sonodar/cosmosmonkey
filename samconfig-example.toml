@@ -1,0 +1,9 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "CosmosMonkey"
+s3_bucket = "your-sam-source-bucket"
+s3_prefix = "your-sam-source-prefix/consmosmonkey"
+region = "ap-northeast-1"
+capabilities = "CAPABILITY_IAM"
