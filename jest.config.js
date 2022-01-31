@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/test/**/*Test.[jt]s'],
   moduleFileExtensions: ['js', 'ts'],
-  transform: { '^.+\\.ts$': 'ts-jest' },
+  transform: { '^.+\\.ts$': '@swc/jest' },
   collectCoverage: true,
   collectCoverageFrom: ['**/src/**'],
   coveragePathIgnorePatterns: ['/node_modules/', '/test/'],

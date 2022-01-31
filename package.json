@@ -8,6 +8,7 @@
   "scripts": {
     "lint": "eslint --fix --ext .js,.ts .",
     "check": "tsc --noEmit",
+    "prebuild": "rm -rf dist/*",
     "build": "esbuild src/index.ts --outfile=dist/main.js --external:aws-sdk --bundle --minify --platform=node --target=node14",
     "test": "jest",
     "invoke": "webpack && sam local invoke --env-vars env.json --no-event"
@@ -16,6 +17,8 @@
     "dayjs": "^1.9.6"
   },
   "devDependencies": {
+    "@swc/core": "^1.2.135",
+    "@swc/jest": "^0.2.17",
     "@types/aws-lambda": "^8.10.61",
     "@types/jest": "^27.4.0",
     "@types/node": "^14.18.9",
@@ -30,7 +33,7 @@
     "jest": "^27.4.7",
     "jest-mock": "^27.4.6",
     "prettier": "^2.5.1",
-    "ts-jest": "^27.1.3",
+    "regenerator-runtime": "^0.13.9",
     "typescript": "^4.0.3"
   }
 }
