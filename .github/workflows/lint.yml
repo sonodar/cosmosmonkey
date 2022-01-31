@@ -1,4 +1,4 @@
-name: Lint by reviewdog
+name: eslint
 
 on:
   - pull_request
@@ -6,7 +6,7 @@ on:
 jobs:
 
   eslint:
-    name: runner / eslint
+    name: eslint
 
     runs-on: ubuntu-latest
 

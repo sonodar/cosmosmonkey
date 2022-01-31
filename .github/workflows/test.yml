@@ -1,4 +1,4 @@
-name: Test with coverage
+name: jest
 
 on:
   - pull_request
@@ -6,7 +6,7 @@ on:
 jobs:
 
   test:
-    name: runner / jest
+    name: jest
 
     runs-on: ubuntu-latest
 
