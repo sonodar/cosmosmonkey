@@ -4,7 +4,7 @@ import { PromiseResult } from 'aws-sdk/lib/request'
 import { RDSClusterResourceManager } from '../../../../src/service/rds/cluster'
 import { RDSClusterResource } from '../../../../src/service/rds/cluster/RDSClusterResource'
 
-import { mocked } from 'ts-jest'
+import { mocked } from 'jest-mock'
 import { createAwsApiMock, defaultStartStopTime, tagName } from '../../utils'
 import { makeListTagsForResourceResponse } from '../RDSTagValueParserTest'
 

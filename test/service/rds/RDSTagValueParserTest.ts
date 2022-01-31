@@ -3,7 +3,7 @@ import { PromiseResult } from 'aws-sdk/lib/request'
 
 import { getRDSTagValue } from '../../../src/service/rds/RDSTagValueParser'
 import { createAwsApiMock } from '../utils'
-import { mocked } from 'ts-jest'
+import { mocked } from 'jest-mock'
 
 jest.mock('aws-sdk')
 

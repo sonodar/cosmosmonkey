@@ -5,7 +5,7 @@ import { AutoScalingPolicy } from '../../../../src/service/ec2/autoscaling/EC2Au
 import { EC2AutoScalingResourceManager } from '../../../../src/service/ec2/autoscaling'
 import { EC2AutoScalingResource } from '../../../../src/service/ec2/autoscaling/EC2AutoScalingResource'
 
-import { mocked } from 'ts-jest'
+import { mocked } from 'jest-mock'
 import { createMockAwsApi, defaultStartStopTime, tagName } from '../../utils'
 
 jest.mock('aws-sdk')
