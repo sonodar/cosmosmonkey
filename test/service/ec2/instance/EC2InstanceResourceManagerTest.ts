@@ -4,7 +4,7 @@ import { PromiseResult } from 'aws-sdk/lib/request'
 import { EC2InstanceResourceManager } from '../../../../src/service/ec2/instance'
 import { EC2InstanceResource } from '../../../../src/service/ec2/instance/EC2InstanceResource'
 
-import { mocked } from 'ts-jest'
+import { mocked } from 'jest-mock'
 import { createMockAwsApi, defaultStartStopTime, tagName } from '../../utils'
 
 jest.mock('aws-sdk')

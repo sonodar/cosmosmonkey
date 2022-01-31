@@ -1,7 +1,7 @@
 # CosmosMonkey
 
 ![lint](https://github.com/sonodar/cosmosmonkey/actions/workflows/lint.yml/badge.svg)
-![lint](https://github.com/sonodar/cosmosmonkey/actions/workflows/test.yml/badge.svg)
+![test](https://github.com/sonodar/cosmosmonkey/actions/workflows/test.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/sonodar/cosmosmonkey/badge.svg?branch=master)](https://coveralls.io/github/sonodar/cosmosmonkey?branch=master)
 
 This is not Chaos-Monkey.
@@ -91,7 +91,7 @@ none.
 ## Deploy
 
 * AWS SAM CLI - [Install the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html).
-* Node.js - [Install Node.js 12](https://nodejs.org/en/), including the npm package management tool.
+* Node.js - [Install Node.js 14](https://nodejs.org/en/), including the npm package management tool.
 * Yarn - [Install Yarn](https://classic.yarnpkg.com/en/docs/install).
 
 ```bash

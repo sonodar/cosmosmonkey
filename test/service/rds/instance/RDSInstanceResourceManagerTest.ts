@@ -4,7 +4,7 @@ import { PromiseResult } from 'aws-sdk/lib/request'
 import { RDSInstanceResourceManager } from '../../../../src/service/rds/instance'
 import { RDSInstanceResource } from '../../../../src/service/rds/instance/RDSInstanceResource'
 
-import { mocked } from 'ts-jest'
+import { mocked } from 'jest-mock'
 import { createAwsApiMock, defaultStartStopTime, tagName } from '../../utils'
 import { makeListTagsForResourceResponse } from '../RDSTagValueParserTest'
 
