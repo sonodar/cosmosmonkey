@@ -1,0 +1,27 @@
+name: Test with coverage
+
+on:
+  - pull_request
+
+jobs:
+
+  test:
+    name: runner / jest
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: install
+        run: yarn install
+
+      - name: jest
+        run: yarn test
+
+      - name: coveralls
+        uses: coverallsapp/github-action@master
