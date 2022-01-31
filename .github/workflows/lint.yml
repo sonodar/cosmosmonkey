@@ -20,6 +20,9 @@ jobs:
       - name: install
         run: yarn install
 
+      - name: type check
+        run: yarn check
+
       - name: eslint
         uses: reviewdog/action-eslint@v1
         with:

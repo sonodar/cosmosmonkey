@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint --fix --ext .js,.ts .",
+    "check": "tsc --noEmit",
     "build": "esbuild src/index.ts --outfile=dist/main.js --external:aws-sdk --bundle --minify --platform=node --target=node14",
     "test": "jest",
     "invoke": "webpack && sam local invoke --env-vars env.json --no-event"
