@@ -91,20 +91,20 @@ none.
 ## Deploy
 
 * AWS SAM CLI - [Install the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html).
-* Node.js - [Install Node.js 14](https://nodejs.org/en/), including the npm package management tool.
-* Yarn - [Install Yarn](https://classic.yarnpkg.com/en/docs/install).
+* Node.js - [Install Node.js 18](https://nodejs.org/en/), including the npm package management tool.
+* pnpm - [Install pnpm](https://pnpm.io/ja/installation).
 
 ```bash
-yarn build
+pnpm run build
 sam deploy --guided
 ```
 
 ## Use the AWS SAM CLI to build and test locally
 
-Build your application by using the `yarn build` command.
+Build your application by using the `pnpm run build` command.
 
 ```bash
-yarn build
+pnpm run build
 DRY_RUN=true sam local invoke --no-event
 ```
 
