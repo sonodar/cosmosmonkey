@@ -1,6 +1,6 @@
 {
   "name": "cosmosmonkey",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.js",
   "repository": "https://github.com/sonodar/cosmosmonkey.git",
   "author": "園田 亮平 <ryoheisonoda@outlook.com>",
